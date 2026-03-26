@@ -1,0 +1,46 @@
+{
+  "description": "Baseline results from Fabian's experiments. 2L = 2-layer distilled student. Tasks: ASR(WER↓), KS, IC, SID, ER, SingID, VocID, InstCls, PitchID, GenreID, ESC50 (all Acc%↑ except ASR)",
+  "task_order": ["asr", "ks", "ic", "sid", "er", "singid", "vocid", "instcls", "pitchid", "genreid", "esc50"],
+  "hubert_base_12L": {
+    "note": "Full HuBERT Base (12 layers, no merging)",
+    "asr_wer": 7.84,
+    "ks": 96.30,
+    "ic": 98.34,
+    "sid": 81.42,
+    "er": 64.92,
+    "singid": 70.25,
+    "vocid": 61.32,
+    "instcls": 62.74,
+    "pitchid": 63.45,
+    "genreid": 70.04,
+    "esc50": 70.20
+  },
+  "naive_avg_12L_no_alignment": {
+    "note": "Naive 0.5/0.5 average of full HuBERT + MERT (12 layers each, no alignment). From Fabian's existing experiments.",
+    "asr_wer": 37.44,
+    "ks": 57.06,
+    "ic": 16.77,
+    "sid": 5.87,
+    "er": 52.20,
+    "singid": 52.17,
+    "vocid": 47.72,
+    "instcls": 43.58,
+    "pitchid": 35.61,
+    "genreid": 41.28,
+    "esc50": 34.35
+  },
+  "perm_2L_distilled_0.9_0.1": {
+    "note": "Permutation-correlation merging, 2-layer distilled students, λ_speech=0.9, λ_music=0.1, FFN+Attn alignment",
+    "asr_wer": 18.46,
+    "ks": 95.78,
+    "ic": 93.51,
+    "sid": null,
+    "er": 64.31,
+    "singid": 70.00,
+    "vocid": 65.16,
+    "instcls": 63.72,
+    "pitchid": 61.38,
+    "genreid": 56.27,
+    "esc50": 68.50
+  }
+}
