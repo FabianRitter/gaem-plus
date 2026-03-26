@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Data (large files — download via rclone, don't commit)
+data/calibration_*.csv
+results/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logfiles/
+*.log
+
+# Cluster state files
+logfiles/.job_state
+
+# ssl-phase1 is a separate git repo (submodule-like, don't nest)
+ssl-phase1/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Large binary files
+*.pptx
+*.docx
+*.sqsh
+*.ckpt
+*.pt
+*.bin
+
+# Track the Excel (research matrices) — it's the source of truth
+# !GAEM_Research_Matrices.xlsx is tracked explicitly below
+

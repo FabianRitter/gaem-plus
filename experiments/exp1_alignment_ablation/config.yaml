@@ -1,0 +1,48 @@
+# Experiment 1: Alignment Method Ablation
+# Compare: No alignment, Permutation, Orthogonal, Semi-Permutation
+#
+# Research Question: Does orthogonal alignment outperform permutation
+# alignment for audio encoder merging (HuBERT + MERT)?
+
+experiment:
+  name: "exp1_alignment_ablation"
+  description: "Permutation vs Orthogonal vs Semi-Permutation alignment for HuBERT+MERT merging"
+
+models:
+  base: "hubert_base"  # Common initialization (HuBERT pretrained weights)
+  encoders:
+    - name: "speech"
+      # Path to speech-distilled student checkpoint (distilled from HuBERT teacher)
+      checkpoint: "ssl-phase1/s3prl/result/pretrain/distilhubert-ls960-own/states-220000.ckpt"
+      teacher: "hubert_base"
+    - name: "music"
+      # Path to music-distilled student checkpoint (distilled from MERT teacher)
+      checkpoint: "ssl-phase1/s3prl/result/pretrain/distill_only_mert-init-weight-from-hubert_base-models-simple-avg-pool-for-teacher-train-libri-960/states-220000.ckpt"
+      teacher: "mert_v0_public"
+
+alignment:
+  methods: ["none", "permutation", "orthogonal"]
+  # Feature extraction for alignment computation
+  feature_extraction:
+    dataset: "librispeech_dev_clean"
+    max_samples: 1000
+    layer: -1  # Last hidden state
+
+merging:
+  weights: [[0.5, 0.5], [0.7, 0.3], [0.3, 0.7]]
+  decompose: false  # No LoRS in this experiment (pure alignment comparison)
+
+evaluation:
+  # Downstream tasks from s3prl
+  tasks:
+    speech: ["asr", "sid", "er"]
+    music: ["singid", "genreid", "instcls"]
+  # Interpolation barrier analysis
+  barrier:
+    n_points: 21
+    eval_tasks: ["asr", "genreid"]  # One speech, one music
+
+output:
+  dir: "results/exp1_alignment_ablation"
+  save_merged_checkpoints: true
+  save_alignment_matrices: true

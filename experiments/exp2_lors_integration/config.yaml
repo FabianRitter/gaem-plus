@@ -1,0 +1,58 @@
+# Experiment 2: LoRS Decomposition Integration
+# Tests whether decomposing task vectors before alignment improves merging.
+#
+# Research Question: Does LoRS decomposition + orthogonal alignment
+# outperform either approach alone?
+
+experiment:
+  name: "exp2_lors_integration"
+  description: "LoRS decomposition ablation with orthogonal alignment"
+
+# Uses same models as Experiment 1
+models:
+  base: "hubert_base"
+  encoders:
+    - name: "speech"
+      checkpoint: "ssl-phase1/s3prl/result/pretrain/distilhubert-ls960-own/states-220000.ckpt"
+    - name: "music"
+      checkpoint: "ssl-phase1/s3prl/result/pretrain/distill_only_mert-init-weight-from-hubert_base-models-simple-avg-pool-for-teacher-train-libri-960/states-220000.ckpt"
+
+alignment:
+  method: "orthogonal"  # Fixed to best from Exp 1
+  feature_extraction:
+    dataset: "librispeech_dev_clean"
+    max_samples: 1000
+
+decomposition:
+  methods:
+    - name: "no_decomposition"
+      decompose: false
+    - name: "lors_r01_s09"
+      decompose: true
+      rank_ratio: 0.1
+      sparsity: 0.9
+    - name: "lors_r02_s08"
+      decompose: true
+      rank_ratio: 0.2
+      sparsity: 0.8
+    - name: "lors_r05_s07"
+      decompose: true
+      rank_ratio: 0.5
+      sparsity: 0.7
+
+sparse_merging:
+  methods: ["average", "ties", "dare"]
+  ties_k: 0.2
+  dare_drop_rate: 0.9
+
+evaluation:
+  tasks:
+    speech: ["asr", "sid", "er"]
+    music: ["singid", "genreid", "instcls"]
+  interference:
+    compute: true
+    layerwise: true
+
+output:
+  dir: "results/exp2_lors_integration"
+  save_lors_stats: true  # Save SVD spectrum analysis per layer
