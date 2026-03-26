@@ -127,30 +127,53 @@ def align_state_dict_orthogonal(
             # Infer type from parameter name and shape
             ltype = _infer_layer_type(name, param)
 
-        if ltype == "skip" or param.dim() == 0:
+        d = O.shape[0]  # alignment dimension (e.g., 768)
+
+        # Skip params whose dimensions don't match O (e.g., CNN layers with dim 512)
+        def _dim_compatible(p, d):
+            if p.dim() == 2:
+                return p.shape[0] == d or p.shape[1] == d
+            elif p.dim() == 1:
+                return p.shape[0] == d
+            return False
+
+        if ltype == "skip" or param.dim() == 0 or not _dim_compatible(param, d):
             aligned[name] = param.clone()
         elif ltype == "norm":
-            # LayerNorm/RMSNorm parameters are invariant
             aligned[name] = param.clone()
         elif ltype == "linear_in" and param.dim() == 2:
-            # Input-side linear: W -> W @ O
-            aligned[name] = param @ O
+            # Input-side linear: W -> W @ O (requires W.shape[1] == d)
+            if param.shape[1] == d:
+                aligned[name] = param @ O
+            else:
+                aligned[name] = param.clone()
         elif ltype == "linear_out" and param.dim() == 2:
-            # Output-side linear: W -> O^T @ W
-            aligned[name] = O.T @ param
+            # Output-side linear: W -> O^T @ W (requires W.shape[0] == d)
+            if param.shape[0] == d:
+                aligned[name] = O.T @ param
+            else:
+                aligned[name] = param.clone()
         elif ltype == "linear_both" and param.dim() == 2:
-            # Both sides: W -> O^T @ W @ O
-            aligned[name] = O.T @ param @ O
-        elif ltype == "bias":
-            aligned[name] = O.T @ param
+            # Both sides: W -> O^T @ W @ O (requires both dims == d)
+            if param.shape[0] == d and param.shape[1] == d:
+                aligned[name] = O.T @ param @ O
+            elif param.shape[0] == d:
+                aligned[name] = O.T @ param
+            elif param.shape[1] == d:
+                aligned[name] = param @ O
+            else:
+                aligned[name] = param.clone()
+        elif ltype == "bias" and param.dim() == 1:
+            if param.shape[0] == d:
+                aligned[name] = O.T @ param
+            else:
+                aligned[name] = param.clone()
         elif param.dim() == 1:
-            # 1D params: assume norm or bias
-            if "bias" in name:
+            if "bias" in name and param.shape[0] == d:
                 aligned[name] = O.T @ param
             else:
                 aligned[name] = param.clone()
         else:
-            # Default: clone without transformation
             aligned[name] = param.clone()
 
     return aligned
