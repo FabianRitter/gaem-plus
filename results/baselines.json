@@ -1,46 +1,87 @@
 {
-  "description": "Baseline results from Fabian's experiments. 2L = 2-layer distilled student. Tasks: ASR(WER↓), KS, IC, SID, ER, SingID, VocID, InstCls, PitchID, GenreID, ESC50 (all Acc%↑ except ASR)",
+  "description": "Baseline results. All from Paper 1 (arXiv:2506.11403) Table I unless noted. Tasks: ASR(WER%↓), KS/IC/SID/ER/SingID/VocID/InstCls/PitchID/GenreID/ESC50 (Acc%↑). Scores: Speech=normalized to HuBERT=1000, Music=normalized to MERT=1000.",
   "task_order": ["asr", "ks", "ic", "sid", "er", "singid", "vocid", "instcls", "pitchid", "genreid", "esc50"],
-  "hubert_base_12L": {
-    "note": "Full HuBERT Base (12 layers, no merging)",
-    "asr_wer": 7.84,
-    "ks": 96.30,
-    "ic": 98.34,
-    "sid": 81.42,
-    "er": 64.92,
-    "singid": 70.25,
-    "vocid": 61.32,
-    "instcls": 62.74,
-    "pitchid": 63.45,
-    "genreid": 70.04,
-    "esc50": 70.20
+
+  "paper1_ID1_hubert_base": {
+    "note": "ID 1: HuBERT Base (individual, no merging)",
+    "weight": "1.0/0.0",
+    "asr": 7.84, "ks": 96.30, "ic": 98.34, "sid": 81.42, "er": 64.92,
+    "singid": 70.25, "vocid": 61.32, "instcls": 62.74, "pitchid": 70.04, "genreid": 63.45, "esc50": 70.20,
+    "speech_score": 1000, "music_score": 885.63, "avg_score": 942.82
   },
-  "naive_avg_12L_no_alignment": {
-    "note": "Naive 0.5/0.5 average of full HuBERT + MERT (12 layers each, no alignment). From Fabian's existing experiments.",
-    "asr_wer": 37.44,
-    "ks": 57.06,
-    "ic": 16.77,
-    "sid": 5.87,
-    "er": 52.20,
-    "singid": 52.17,
-    "vocid": 47.72,
-    "instcls": 43.58,
-    "pitchid": 35.61,
-    "genreid": 41.28,
-    "esc50": 34.35
+  "paper1_ID2_mert_base": {
+    "note": "ID 2: MERT v0 Public (individual, no merging)",
+    "weight": "0.0/1.0",
+    "asr": 23.61, "ks": 89.45, "ic": 59.21, "sid": 29.49, "er": 55.19,
+    "singid": 79.00, "vocid": 72.54, "instcls": 64.97, "pitchid": 91.26, "genreid": 70.69, "esc50": 73.97,
+    "speech_score": 665.53, "music_score": 1000, "avg_score": 832.77
   },
-  "perm_2L_distilled_0.9_0.1": {
-    "note": "Permutation-correlation merging, 2-layer distilled students, λ_speech=0.9, λ_music=0.1, FFN+Attn alignment",
-    "asr_wer": 18.46,
-    "ks": 95.78,
-    "ic": 93.51,
-    "sid": null,
-    "er": 64.31,
-    "singid": 70.00,
-    "vocid": 65.16,
-    "instcls": 63.72,
-    "pitchid": 61.38,
-    "genreid": 56.27,
-    "esc50": 68.50
+  "paper1_ID3_naive_avg": {
+    "note": "ID 3: Naive average (HB+MR)/2, no alignment",
+    "weight": "0.5/0.5",
+    "asr": 37.44, "ks": 57.06, "ic": 16.77, "sid": 5.87, "er": 52.20,
+    "singid": 52.17, "vocid": 47.72, "instcls": 43.58, "pitchid": 41.28, "genreid": 35.61, "esc50": 34.35,
+    "speech_score": 385.19, "music_score": 567.92, "avg_score": 476.55
+  },
+  "paper1_ID4_weighted_no_align": {
+    "note": "ID 4: 0.9 HuBERT + 0.1 MERT, no alignment",
+    "weight": "0.9/0.1",
+    "asr": 9.47, "ks": 95.23, "ic": 97.02, "sid": 77.24, "er": 65.12,
+    "singid": 71.33, "vocid": 61.75, "instcls": 62.04, "pitchid": 70.03, "genreid": 69.56, "esc50": 67.05,
+    "speech_score": 981.80, "music_score": 894.42, "avg_score": 938.11
+  },
+  "paper1_ID5_proposed_cnn_ffnattn": {
+    "note": "ID 5: CNN + fnn+attn permutation (PROPOSED, best). Per-layer per-head correlation-permutation.",
+    "weight": "0.9/0.1",
+    "asr": 8.88, "ks": 96.17, "ic": 97.79, "sid": 80.22, "er": 65.61,
+    "singid": 72.74, "vocid": 63.98, "instcls": 63.79, "pitchid": 70.00, "genreid": 69.62, "esc50": 71.69,
+    "speech_score": 997.72, "music_score": 917.58, "avg_score": 957.65
+  },
+  "paper1_ID6_cnn_only": {
+    "note": "ID 6: CNN permutation only, no transformer alignment",
+    "weight": "0.9/0.1",
+    "asr": 9.52, "ks": 95.43, "ic": 94.06, "sid": 77.44, "er": 62.95,
+    "singid": 73.31, "vocid": 59.30, "instcls": 61.47, "pitchid": 70.22, "genreid": 68.28, "esc50": 66.07,
+    "speech_score": 961.27, "music_score": 886.62, "avg_score": 923.95
+  },
+  "paper1_ID7_cnn_ff_only": {
+    "note": "ID 7: CNN + FFN-only permutation (no attention head alignment)",
+    "weight": "0.9/0.1",
+    "asr": 9.92, "ks": 95.59, "ic": 95.10, "sid": 77.61, "er": 66.64,
+    "singid": 72.38, "vocid": 60.26, "instcls": 61.16, "pitchid": 70.53, "genreid": 68.62, "esc50": 65.45,
+    "speech_score": 988.43, "music_score": 886.06, "avg_score": 937.24
+  },
+  "paper1_ID8_cnn_all": {
+    "note": "ID 8: CNN + all transformer permutation (Q,K,V,heads,W2). Worse than selective.",
+    "weight": "0.9/0.1",
+    "asr": 9.70, "ks": 95.62, "ic": 94.62, "sid": 77.70, "er": 64.91,
+    "singid": 71.39, "vocid": 59.91, "instcls": 60.91, "pitchid": 70.23, "genreid": 68.62, "esc50": 64.80,
+    "speech_score": 976.46, "music_score": 880.52, "avg_score": 928.49
+  },
+  "paper1_ID9_ffnattn_no_cnn": {
+    "note": "ID 9: fnn+attn only (no CNN permutation). Transformer-only alignment.",
+    "weight": "0.9/0.1",
+    "asr": 9.08, "ks": 95.42, "ic": 96.97, "sid": 75.97, "er": 65.91,
+    "singid": 73.52, "vocid": 62.54, "instcls": 61.23, "pitchid": 71.44, "genreid": 70.34, "esc50": 67.05,
+    "speech_score": 985.30, "music_score": 903.22, "avg_score": 944.26
+  },
+
+  "gaem_global_procrustes_05_05": {
+    "note": "GAEM+ Exp 1: Global Procrustes (single 768x768 O matrix), 0.5/0.5 weights",
+    "weight": "0.5/0.5",
+    "genreid": 48.62,
+    "_status": "partial — only genre_gtzan evaluated"
+  },
+  "gaem_global_procrustes_07_03": {
+    "note": "GAEM+ Exp 1: Global Procrustes, 0.7/0.3 weights",
+    "weight": "0.7/0.3",
+    "genreid": 51.38,
+    "_status": "partial — only genre_gtzan evaluated"
+  },
+  "gaem_simple_avg_05_05": {
+    "note": "GAEM+ Exp 1: Simple average (no alignment), 0.5/0.5",
+    "weight": "0.5/0.5",
+    "genreid": 44.48,
+    "_status": "partial — only genre_gtzan evaluated"
   }
 }

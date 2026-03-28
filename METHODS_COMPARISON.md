@@ -135,11 +135,28 @@ This is essentially Method 1 applied to full 12L HuBERT and MERT (not just 2L di
 
 ---
 
+## Results Comparison (Genre Classification — GTZAN)
+
+| ID | Method | λ (H:M) | GenreID Acc% | Avg Score |
+|----|--------|---------|-------------|-----------|
+| 1 | HuBERT alone | 1.0:0.0 | **63.45** | 942.82 |
+| 2 | MERT alone | 0.0:1.0 | **70.69** | 832.77 |
+| 3 | Naive avg (Paper 1) | 0.5:0.5 | 35.61 | 476.55 |
+| — | Simple avg (GAEM+, our run) | 0.5:0.5 | 44.48 | — |
+| 4 | Weighted, no align (Paper 1) | 0.9:0.1 | **69.56** | 938.11 |
+| **5** | **Corr-Perm CNN+fnn+attn (Paper 1 best)** | **0.9:0.1** | **69.62** | **957.65** |
+| — | Global Procrustes (GAEM+) | 0.5:0.5 | 48.62 | — |
+| — | Global Procrustes (GAEM+) | 0.7:0.3 | 51.38 | — |
+
+**Key observation**: Paper 1's best method (ID 5) at 0.9/0.1 achieves 69.62% on GenreID — essentially matching unaligned 0.9/0.1 (69.56%) on this task. The permutation alignment's value shows more on speech tasks: ASR improves from 9.47→8.88 WER, SID from 77.24→80.22.
+
+**Our global Procrustes at 0.5/0.5 (48.62%) and 0.7/0.3 (51.38%) cannot be directly compared to Paper 1's 0.9/0.1 (69.62%) because the weights differ massively.** The 0.9/0.1 ratio alone (without any alignment, ID 4) already achieves 69.56%. We need to run Procrustes at 0.9/0.1 for a fair comparison.
+
 ## Why Global Procrustes Underperforms Per-Layer Permutation
 
-### Exp 0/1 evidence:
-- Global Procrustes: 35.7% feature alignment improvement → 51.4% genre accuracy (vs 70% HuBERT)
-- Per-layer permutation (Paper 1, 12L): reported results in paper (TBD — awaiting paper numbers)
+### Evidence:
+- Global Procrustes: 35.7% feature alignment improvement → 51.4% genre accuracy (at 0.7/0.3)
+- Per-layer permutation (Paper 1, ID 5): 69.62% genre accuracy (at 0.9/0.1)
 
 ### Root causes:
 
@@ -179,9 +196,18 @@ This combines:
 
 ---
 
+## Critical Insight: The Weight Ratio Matters More Than Alignment Method
+
+Paper 1 shows that **unaligned 0.9/0.1** (ID 4, avg score 938.11) already achieves 99.5% of HuBERT's avg score. The permutation alignment (ID 5) adds another +19.5 points (to 957.65), which is a real improvement but the weight ratio is doing most of the heavy lifting.
+
+Our GAEM+ experiments used 0.5/0.5 and 0.7/0.3 — these are **much harder** merging settings where both models contribute significantly. At 0.9/0.1, HuBERT dominates and MERT is just a small perturbation. At 0.5/0.5, you need genuine alignment to avoid catastrophic collapse.
+
+**For GAEM+ to make a strong contribution, we should show it works at harder ratios (0.5/0.5 or 0.7/0.3) where Paper 1's permutation approach would also struggle.** The batch v2 script includes 0.9/0.1 Procrustes runs for fair comparison.
+
 ## Next Experiments Needed
 
-1. **Complete the weight sweep**: Evaluate all methods at λ = {0.1, 0.3, 0.5, 0.7, 0.9} on ASR + GenreID + SingerID + TechniqueID
-2. **Per-layer Procrustes**: Implement and compare against global Procrustes and per-layer permutation
-3. **LoRS + TSV on top of best alignment**: Apply decomposition to the aligned task vectors
-4. **Compare against Paper 1 results**: Use the exact same downstream evaluation protocol for fair comparison
+1. **Run batch v2**: ASR + SingerID + TechniqueID at weights {0.1/0.9, 0.3/0.7, 0.5/0.5, 0.7/0.3, 0.9/0.1} — 5 weights × 3 tasks. Script ready: `scripts/run_gaem_downstream_batch_v2.sh`
+2. **Per-layer Procrustes**: Implement O_l per layer using per-layer features (already extracted in Exp 0). This should significantly improve over global Procrustes, especially for attention layers.
+3. **Compare at 0.9/0.1**: Fair comparison of global Procrustes vs Paper 1's correlation-permutation. Both at same λ, same tasks, same evaluation.
+4. **LoRS + TSV on top of per-layer Procrustes**: The GAEM+ contribution that neither Paper 1 nor GLMC implements.
+5. **Per-head Procrustes**: Apply 64×64 orthogonal transforms within each attention head — combines the continuous richness of O(64) with Paper 1's per-head structure preservation.
