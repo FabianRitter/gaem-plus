@@ -23,7 +23,7 @@ PROXY="http://10.104.4.124:10104"
 # Data paths
 LIBRISPEECH="/data/projects/12004380/datasets/superb/superb/Librispeech/LibriSpeech"
 GTZAN="/data/projects/12004380/datasets/superb/superb/GTZAN"
-VOCALSET_AUDIO="/data/projects/12004380/fabian/task-arithmetic-speech-audio/s3prl/data/vocalset_processed/audio"
+VOCALSET="/data/projects/12004380/fabian/task-arithmetic-speech-audio/s3prl/data/vocalset_processed"
 
 HF_MODEL="${PROJECT}/${model_base}/${method}"
 RESULT_DIR="${PROJECT}/results/downstream_results/${method}/${task}"
@@ -47,19 +47,19 @@ case "$task" in
         ;;
     genre_gtzan)
         CONFIG="./downstream/genre_gtzan/config.yaml"
-        OVERRIDE="-o config.downstream_expert.datarc.file_path=${GTZAN},,config.downstream_expert.datarc.meta_data=${GTZAN},,config.downstream_expert.datarc.num_workers=8"
+        OVERRIDE="-o config.runner.total_steps=10000,,config.runner.log_step=200,,config.runner.eval_step=200,,config.runner.save_step=200,,config.downstream_expert.datarc.file_path=${GTZAN},,config.downstream_expert.datarc.meta_data=${GTZAN},,config.downstream_expert.datarc.num_workers=8"
         BEST="valid-best.ckpt"
         EVAL_ARGS=""
         ;;
     vocalset_singer_id)
         CONFIG="./downstream/vocalset_singer_id/config.yaml"
-        OVERRIDE="-o config.downstream_expert.datarc.file_path=${VOCALSET_AUDIO},,config.downstream_expert.datarc.meta_data=./downstream/vocalset_singer_id/data,,config.downstream_expert.datarc.num_workers=8"
+        OVERRIDE="-o config.downstream_expert.datarc.file_path=${VOCALSET},,config.downstream_expert.datarc.meta_data=./downstream/vocalset_singer_id/data,,config.downstream_expert.datarc.num_workers=8"
         BEST="dev-best.ckpt"
         EVAL_ARGS=""
         ;;
     vocalset_technique_id)
         CONFIG="./downstream/vocalset_technique_id/config.yaml"
-        OVERRIDE="-o config.downstream_expert.datarc.file_path=${VOCALSET_AUDIO},,config.downstream_expert.datarc.meta_data=./downstream/vocalset_technique_id/data,,config.downstream_expert.datarc.num_workers=8"
+        OVERRIDE="-o config.downstream_expert.datarc.file_path=${VOCALSET},,config.downstream_expert.datarc.meta_data=./downstream/vocalset_technique_id/data,,config.downstream_expert.datarc.num_workers=8"
         BEST="dev-best.ckpt"
         EVAL_ARGS=""
         ;;
