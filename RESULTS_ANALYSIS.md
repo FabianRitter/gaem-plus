@@ -51,13 +51,46 @@ Test whether **orthogonal alignment (Procrustes)** outperforms **permutation ali
 | Global Procrustes | 0.7:0.3 | 51.38 | 64.84 | 56.33 |
 | Simple avg | 0.5:0.5 | — | 47.48 | 40.64 |
 
-**ASR results**: Still running (5 jobs, ~10h each). Will update when available.
+### ASR Results (WER% on test-clean, lower is better)
 
-### Ranking (Non-ASR tasks)
+| Method | λ (H:M) | ASR WER% |
+|--------|---------|----------|
+| HuBERT alone (Paper 1) | 1:0 | **7.84** |
+| Corr-Perm (Paper 1 best) | 0.9:0.1 | **8.88** |
+| No-align weighted (Paper 1) | 0.9:0.1 | 9.47 |
+| **Per-layer Procrustes** | **0.9:0.1** | **10.72** |
+| Global Procrustes | 0.9:0.1 | 13.19 |
+| Global Procrustes | 0.7:0.3 | *killed at 97.8%* |
+| Per-layer Procrustes | 0.7:0.3 | *killed at 99.3%* |
+| Simple avg | 0.5:0.5 | *killed at 97.4%* |
+
+3 ASR jobs hit the 12-hour walltime limit at >97% completion. The 0.9/0.1 jobs completed successfully.
+
+**ASR confirms the same pattern**: Per-layer Procrustes (10.72%) > Global Procrustes (13.19%) > Paper 1 unaligned (9.47) > Paper 1 Corr-Perm (8.88). Per-layer Procrustes is 1.84 pp worse than Paper 1's best method.
+
+### Complete Comparison Table
+
+| Method | λ | ASR WER%↓ | GenreID↑ | SingerID↑ | TechID↑ |
+|--------|---|-----------|----------|----------|---------|
+| HuBERT alone | 1:0 | **7.84** | 63.45 | 70.25 | 61.32 |
+| MERT alone | 0:1 | 23.61 | **70.69** | **79.00** | **72.54** |
+| **Corr-Perm (Paper 1)** | **0.9:0.1** | **8.88** | **69.62** | **72.74** | **63.98** |
+| No-align weighted | 0.9:0.1 | 9.47 | 69.56 | 71.33 | 61.75 |
+| **Per-layer Procrustes** | **0.9:0.1** | **10.72** | **64.14** | **69.56** | **61.91** |
+| Global Procrustes | 0.9:0.1 | 13.19 | 63.45 | 67.17 | 60.78 |
+| Per-layer Procrustes | 0.7:0.3 | — | 53.79 | 63.54 | 56.68 |
+| Global Procrustes | 0.7:0.3 | — | 51.38 | 64.84 | 56.33 |
+| Simple avg | 0.5:0.5 | — | 44.48 | 47.48 | 40.64 |
+
+### Ranking (All tasks, at 0.9/0.1)
 
 ```
-Corr-Perm (Paper 1, 0.9/0.1)  >>>  Per-layer Procrustes (0.9/0.1)  >  Global Procrustes (0.9/0.1)  >  No-align (0.9/0.1)  >>>  Simple avg
+Corr-Perm (Paper 1)  >>  Per-layer Procrustes  >  No-align weighted  >  Global Procrustes
+     8.88 WER               10.72 WER              9.47 WER              13.19 WER
+     69.62 GenreID           64.14 GenreID          69.56 GenreID         63.45 GenreID
 ```
+
+**Note**: On ASR, even unaligned weighted interpolation (9.47) beats our per-layer Procrustes (10.72). This confirms the Procrustes approach damages the model rather than helping for speech tasks — the head-mixing effect is destructive.
 
 ## 3. Why Per-Layer Procrustes Underperformed Paper 1
 
